@@ -7,11 +7,25 @@ use std::error::Error;
 use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 use std::str;
 use std::str::Utf8Error;
+
+#[derive(Debug)]
 pub struct Request<'buf> {
     //<'buf> ' + 문자 = 수명의 나타냄, 수명은 제네릭
     path: &'buf str,
     query_string: Option<QueryString<'buf>>,
     method: Method,
+}
+
+impl<'buf> Request<'buf> {
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+    pub fn method(&self) -> &Method {
+        &self.method
+    }
+    pub fn query_string(&self) -> Option<&QueryString> {
+        self.query_string.as_ref()
+    }
 }
 
 impl Request<'_> {
@@ -34,6 +48,7 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
         // -> 다음줄과 같은 코드,
 
         let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
+        println!("request: {}", request);
         let (mut path, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
         let (protocol, _) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
 
